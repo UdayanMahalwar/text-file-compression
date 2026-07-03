@@ -96,14 +96,48 @@ public:
     }
 
     void encode(ifstream& input, ofstream& output, const unordered_map<char, int>& freq) {
+        // Write metadata (frequency table)
         for (const auto& it : freq) {
             output << (int)it.first << " " << mp[it.first] << "\n";
         }
         output << "..............................." << "\n";
+        
+        // Build bit string
+        string bitString = "";
         char ch;
         while (input.get(ch)) {
-            output << mp[ch];
+            bitString += mp[ch];
         }
+        
+        // Write total number of bits
+        output << bitString.length() << "\n";
+        
+        // Switch to binary mode and pack bits into bytes
+        output.clear();
+        output.close();
+        ofstream binaryOutput("output.txt", ios::binary | ios::app);
+        
+        unsigned char byte = 0;
+        int bitCount = 0;
+        
+        for (char bit : bitString) {
+            byte = (byte << 1) | (bit - '0');
+            bitCount++;
+            
+            if (bitCount == 8) {
+                binaryOutput.write(reinterpret_cast<const char*>(&byte), sizeof(unsigned char));
+                byte = 0;
+                bitCount = 0;
+            }
+        }
+        
+        // Write remaining bits (padded with zeros)
+        if (bitCount > 0) {
+            byte = byte << (8 - bitCount);
+            binaryOutput.write(reinterpret_cast<const char*>(&byte), sizeof(unsigned char));
+        }
+        
+        binaryOutput.close();
     }
 
     ~Huffman() {

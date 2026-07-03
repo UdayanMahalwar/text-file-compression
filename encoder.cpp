@@ -29,7 +29,7 @@ int main(){
         cout << "Failed to reopen file\n";
         return 0;
     }
-    ofstream output("output.txt");
+    ofstream output("output.txt", ios::binary);
     if(!output.is_open())
     {
         cout << "Failed to create output file\n";
